@@ -8,6 +8,7 @@ class Dispatcher {
     private $staticRouteMap;
     private $variableRouteData;
     private $filters;
+    private $resources;
     private $handlerResolver;
     public $matchedRoute;
 
@@ -24,6 +25,8 @@ class Dispatcher {
         $this->variableRouteData = $data->getVariableRoutes();
         
         $this->filters = $data->getFilters();
+
+        $this->resources = $data->getResources();
         
         if ($resolver === null)
         {
@@ -199,6 +202,8 @@ class Dispatcher {
             {
                 $httpMethod = $this->checkFallbacks($routes, $httpMethod);
             } 
+          
+            $prev = null;
 
             foreach (array_values($routes[$httpMethod][2]) as $i => $varName)
             {
@@ -208,7 +213,14 @@ class Dispatcher {
                 }
                 else
                 {
-                    $routes[$httpMethod][2][$varName] = $matches[$i + 1];
+                    $match = $matches[$i + 1];
+
+                    if (isset($this->resources[$varName]))
+                    {
+                      $match = $this->resources[$varName]($match, $prev);
+                    }
+
+                    $prev = $routes[$httpMethod][2][$varName] = $match;
                 }
             }
 

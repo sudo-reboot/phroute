@@ -32,6 +32,10 @@ class RouteCollector implements RouteDataProviderInterface {
     /**
      * @var array
      */
+    private $resources = [];
+    /**
+     * @var array
+     */
     private $staticRoutes = [];
     /**
      * @var array
@@ -217,6 +221,15 @@ class RouteCollector implements RouteDataProviderInterface {
     }
 
     /**
+     * @param $name
+     * @param $resolver
+     */
+    public function resource($name, $resolver)
+    {
+        $this->resources[$name] = $resolver;
+    }
+
+    /**
      * @param $route
      * @param $handler
      * @param array $filters
@@ -392,10 +405,15 @@ class RouteCollector implements RouteDataProviderInterface {
     {
         if (empty($this->regexToRoutesMap))
         {
-            return new RouteDataArray($this->staticRoutes, [], $this->filters);
+            return new RouteDataArray($this->staticRoutes, [], $this->filters, $this->resources);
         }
 
-        return new RouteDataArray($this->staticRoutes, $this->generateVariableRouteData(), $this->filters);
+        return new RouteDataArray(
+            $this->staticRoutes,
+            $this->generateVariableRouteData(),
+            $this->filters,
+            $this->resources
+        );
     }
 
     /**
